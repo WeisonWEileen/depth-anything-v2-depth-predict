@@ -3,15 +3,18 @@
 
 #include <iostream>
 #include <chrono>
-#include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <cstddef>
+
+#include <opencv2/opencv.hpp>
+// #include <opencv2/core/core.hpp>
+// #include <opencv2/features2d/features2d.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 
 class ORBMatcher
 {
 public:
     ORBMatcher();
-    void match(
+    std::pair<std::vector<cv::Point>, std::vector<cv::Point>> match(
         const cv::Mat &img_1,
         const cv::Mat &img_2);
     void show_keypoints(
@@ -25,11 +28,16 @@ public:
         const std::vector<cv::KeyPoint> &keypoints_2,
         const std::vector<cv::DMatch> &matches,
         std::string window_name);
+    void visualize_matches(
+        const cv::Mat &img_1,
+        const cv::Mat &img_2,
+        const std::vector<cv::Point> &pixel_cords_1,
+        const std::vector<cv::Point> &pixel_cords_2,
+        const std::string &window_name);
 
 private:
     cv::Ptr<cv::ORB> detector_;
     cv::Ptr<cv::DescriptorMatcher> matcher_;
 };
-
 
 #endif

@@ -14,8 +14,6 @@ void ORBMatcher::show_keypoints(
     cv::Mat outimg;
     cv::drawKeypoints(img, keypoints, outimg, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
     cv::imshow(window_name, outimg);
-
-    // cv::waitKey(0);
 }
 
 void ORBMatcher::show_matches(
@@ -29,11 +27,32 @@ void ORBMatcher::show_matches(
     cv::Mat img_match;
     cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
     cv::imshow(window_name, img_match);
-
-    cv::waitKey(0);
 }
 
-void ORBMatcher::match(
+void ORBMatcher::visualize_matches(
+    const cv::Mat &img_1,
+    const cv::Mat &img_2,
+    const std::vector<cv::Point> &pixel_cords_1,
+    const std::vector<cv::Point> &pixel_cords_2,
+    const std::string &window_name)
+{
+    cv::Mat img_combined;
+    cv::hconcat(img_1, img_2, img_combined);
+
+    for (int i = 0; i < pixel_cords_1.size(); i++)
+    {
+        cv::Point pt1 = pixel_cords_1[i];
+        cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
+
+        cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 2);
+        cv::circle(img_combined, pt1, 5, cv::Scalar(0, 0, 255), -1);
+        cv::circle(img_combined, pt2, 5, cv::Scalar(0, 0, 255), -1);
+    }
+
+    cv::imshow(window_name, img_combined);
+}
+
+std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
     const cv::Mat &img_1,
     const cv::Mat &img_2)
 {
@@ -73,11 +92,16 @@ void ORBMatcher::match(
 
     // Filter Match Pairs.
     std::vector<cv::DMatch> good_matches;
+    std::vector<cv::Point> pixel_cords_1, pixel_cords_2;
     for (int i = 0; i < descriptors_1.rows; i++)
     {
-        if (matches[i].distance <= std::max(2 * min_dist, 30.0))
+        if (matches[i].distance <= std::max(2 * min_dist, 20.0))
         {
             good_matches.push_back(matches[i]);
+            pixel_cords_1.push_back(cv::Point(static_cast<int>(keypoints_1[matches[i].queryIdx].pt.x),
+                                              static_cast<int>(keypoints_1[matches[i].queryIdx].pt.y)));
+            pixel_cords_2.push_back(cv::Point(static_cast<int>(keypoints_2[matches[i].trainIdx].pt.x),
+                                              static_cast<int>(keypoints_2[matches[i].trainIdx].pt.y)));
         }
     }
 
@@ -85,6 +109,11 @@ void ORBMatcher::match(
     std::chrono::duration<double, std::milli> duration = end - start;
     std::cout << "Calculate time: " << duration.count() << "ms" << std::endl;
 
+    return std::make_pair(pixel_cords_1, pixel_cords_2);
+
     // show_matches(img_1, img_2, keypoints_1, keypoints_2, matches, "All Matches");
-    show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
+    // show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
+    // visualize_matches(img_1, img_2, pixel_cords_1, pixel_cords_2, "Good Pairs");
+
+    // cv::waitKey(0);
 }
