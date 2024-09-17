@@ -109,11 +109,11 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
     std::chrono::duration<double, std::milli> duration = end - start;
     std::cout << "Calculate time: " << duration.count() << "ms" << std::endl;
 
-    return std::make_pair(pixel_cords_1, pixel_cords_2);
-
     // show_matches(img_1, img_2, keypoints_1, keypoints_2, matches, "All Matches");
-    // show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
+    show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
     // visualize_matches(img_1, img_2, pixel_cords_1, pixel_cords_2, "Good Pairs");
 
-    // cv::waitKey(0);
+    cv::waitKey(0);
+
+    return std::make_pair(pixel_cords_1, pixel_cords_2);
 }
