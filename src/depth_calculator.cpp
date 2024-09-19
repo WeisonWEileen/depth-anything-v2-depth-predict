@@ -25,10 +25,10 @@ void getPathConfigs(cv::FileStorage &fsSettings, std::vector<std::string> &file_
     file_paths.push_back(fsSettings["tif_path_1st"]);
     file_paths.push_back(fsSettings["tif_path_2st"]);
     file_paths.push_back(fsSettings["cam2can_calib_path"]);
-    file_paths.push_back(fsSettings["poses_path"]);
+    file_paths.push_back(fsSettings["pose_path"]);
 }
 
-int main()
+int main(int argc, char **argv)
 {
 
     std::string config_file = "./config/filePath.yaml";
@@ -85,6 +85,10 @@ int main()
         std::cerr << "Error: Could not open or find the poses." << std::endl;
         return -1;
     }
+
+    // std::cerr << "Rotation: " << rotation << std::endl;
+    // std::cerr << "Translation: " << translation << std::endl;
+    // std::cerr << "Test: " << rotation*rotation.transpose() << std::endl;
 
     ORBMatcher orb_matcher;
     std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
