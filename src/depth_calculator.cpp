@@ -1,67 +1,86 @@
+#include <string>
+
 #include "utils.h"
 #include "orb_matcher.h"
 #include "depth_aligner.h"
 
+auto disparity2depth(std::vector < std::vector<float>>& img){
+    for (auto& row  : img )
+    {
+        for (auto& value : row)
+        {
+            if (std::isfinite(value) && value != 0.0f) // Check if value is finite and not zero
+            {
+                value = 1.0f / value;
+            }
+    }
+    }
+    return img;
+} 
+
+void getPathConfigs(cv::FileStorage &fsSettings, std::vector<std::string> &file_paths)
+{
+    file_paths.push_back(fsSettings["rgb_path_1st"]);
+    file_paths.push_back(fsSettings["rgb_path_2st"]);
+    file_paths.push_back(fsSettings["tif_path_1st"]);
+    file_paths.push_back(fsSettings["tif_path_2st"]);
+    file_paths.push_back(fsSettings["cam2can_calib_path"]);
+    file_paths.push_back(fsSettings["pose_path"]);
+}
+
 int main(int argc, char **argv)
 {
-    if (argc != 7)
-    {
-        std::cout << "Usage: depth_calculate img1 img2 depth_pred1 depth_pred2 calibs poses." << std::endl;
-        return -1;
-    }
+
+    std::string config_file = "./config/filePath.yaml";
+    cv::FileStorage fsSettings(config_file.c_str(), cv::FileStorage::READ);
+
+    std::vector<std::string> file_paths;
+    getPathConfigs(fsSettings, file_paths);
 
     /* Read image. */
-    cv::Mat img_1 = imread(argv[1], cv::IMREAD_COLOR);
+    cv::Mat img_1 = cv::imread(file_paths[0], cv::IMREAD_COLOR);
     if (img_1.empty())
     {
         std::cerr << "Error: Could not open or find the img1." << std::endl;
         return -1;
     }
 
-    cv::Mat img_2 = imread(argv[2], cv::IMREAD_COLOR);
+    cv::Mat img_2 = imread(file_paths[1], cv::IMREAD_COLOR);
     if (img_2.empty())
     {
         std::cerr << "Error: Could not open or find the img2." << std::endl;
         return -1;
     }
 
-    // std::vector<std::vector<float>> depth_gt;
-    // readDepthImage(argv[3], depth_gt);
-    // if(depth_gt.empty())
-    // {
-    //     std::cerr << "Error: Could not open or find the image 'depth_gt.png'" << std::endl;
-    //     return -1;
-    // }
 
     std::vector<std::vector<float>> depth_pred_1;
-    if (!readTiffImage(argv[3], depth_pred_1))
+    if (!readTiffImage(file_paths[2], depth_pred_1))
     {
         std::cerr << "Error: Could not open or find the depth_pred1" << std::endl;
         return -1;
     }
+    depth_pred_1 = disparity2depth(depth_pred_1);
 
     std::vector<std::vector<float>> depth_pred_2;
-    if (!readTiffImage(argv[4], depth_pred_2))
+    if (!readTiffImage(file_paths[3],depth_pred_2))
     {
         std::cerr << "Error: Could not open or find the depth_pred2" << std::endl;
         return -1;
     }
+    depth_pred_2 = disparity2depth(depth_pred_2);
 
     Eigen::Matrix<double, 3, 3> camera_intrinsics;
-    if (!readIntrinsics(argv[5], camera_intrinsics))
+    if (!readIntrinsics(file_paths[4],camera_intrinsics))
     {
         std::cerr << "Error: Could not open or find the calib." << std::endl;
         return -1;
     }
-
-    // std::cerr << "Camera intrinsics: " << camera_intrinsics << std::endl;
-
+    
     Eigen::Matrix3d rotation;
     Eigen::Vector3d translation;
-    int frame_1 = extractNumber(argv[1]);
-    int frame_2 = extractNumber(argv[2]);
-    // std::cerr << "Frame 1: " << frame_1 << " Frame 2: " << frame_2 << std::endl;
-    if (!readPoses(argv[6], frame_1+1, frame_2+1, rotation, translation))
+    int frame_1 = extractNumber(file_paths[0]);
+    int frame_2 = extractNumber(file_paths[1]);
+    if (!readPoses(file_paths[5], frame_1+1, frame_2+1, rotation, translation))
     {
         std::cerr << "Error: Could not open or find the poses." << std::endl;
         return -1;
@@ -73,6 +92,7 @@ int main(int argc, char **argv)
 
     ORBMatcher orb_matcher;
     std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
+    std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl;
     // orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
     // cv::waitKey(0);
 
@@ -82,8 +102,8 @@ int main(int argc, char **argv)
     std::pair<float, float> shifts;
     depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation, translation, scales, shifts);
 
-    std::cerr << "Scales: " << scales.first << " " << scales.second << std::endl;
-    std::cerr << "Shifts: " << shifts.first << " " << shifts.second << std::endl;
+    std::cout << "Scales: " << scales.first << " " << scales.second << std::endl;
+    std::cout << "Shifts: " << shifts.first << " " << shifts.second << std::endl;
 
     return 0;
 }

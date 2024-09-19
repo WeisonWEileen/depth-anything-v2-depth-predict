@@ -1,0 +1,8 @@
+%YAML:1.0
+
+rgb_path_1st : "./test/0000000071.png" 
+rgb_path_2st : "./test/0000000075.png" 
+tif_path_1st : "./test/0000000071_pred.tif"
+tif_path_2st : "./test/0000000075_pred.tif"
+cam2can_calib_path : "./test/calib_cam_to_cam.txt"  
+pose_path : "./test/poses.txt" 

@@ -13,6 +13,18 @@ Eigen::VectorXd DepthAligner::linearLeastSquares(
     return beta;
 }
 
+/**
+@brief
+ *
+ * @param depth_preds the pair of depth predictions using depth-anythiny vit
+model
+ * @param pixel_cords the matched pair of the original rgb images
+ * @param camera_intrinsics
+ * @param rotation 3×3 rotation Matrix
+ * @param translation 3×1 translation vector
+ * @param scales 2 output scales
+ * @param shifts 2 output shifts
+ */
 void DepthAligner::align(
     const std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> &depth_preds,
     const std::pair<std::vector<cv::Point>, std::vector<cv::Point>> &pixel_cords,
@@ -22,7 +34,6 @@ void DepthAligner::align(
     std::pair<float, float> &scales,
     std::pair<float, float> &shifts)
 {
-
     Eigen::VectorXd y(int(3 * pixel_cords.first.size()));
     Eigen::MatrixXd H(int(3 * pixel_cords.first.size()), 4);
 

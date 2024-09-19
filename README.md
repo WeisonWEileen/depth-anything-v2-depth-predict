@@ -1,4 +1,15 @@
 # depth_calculate
 
-## Example:
-./depth_calculator /home/bwshen/depth_ws/src/depth_calculate/test/0000000071.png /home/bwshen/depth_ws/src/depth_calculate/test/0000000080.png /home/bwshen/depth_ws/src/depth_calculate/test/0000000071_pred.tif /home/bwshen/depth_ws/src/depth_calculate/test/0000000080_pred.tif /home/bwshen/depth_ws/src/depth_calculate/test/calib_cam_to_cam.txt /home/bwshen/depth_ws/src/depth_calculate/test/poses.txt
+## run the demo:
+rgb tif and txt files path are configured in ```${workspacefolder}/config/filePath.yaml```. Modified it then run the programme. In the project root dir.
+```
+cmake -B build
+cmkae --build build
+./build/depth_calculator
+```
+
+
+## preprerequisite
+- opencv
+- eigen
+- png++ (download the tar.gz package and run sudo make install)

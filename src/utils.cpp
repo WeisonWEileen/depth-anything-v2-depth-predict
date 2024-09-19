@@ -165,12 +165,13 @@ bool readPoses(
     if (lineNumber == frame_1)
     {
       pose_1 = readPoseFromLine(line);
-      std::cerr << "Pose 1: " << pose_1 << std::endl;
+       
+      std::cout << "Pose1: " << std::endl << pose_1 << std::endl;
     }
     if (lineNumber == frame_2)
     {
       pose_2 = readPoseFromLine(line);
-      std::cerr << "Pose 2: " << pose_2 << std::endl;
+      std::cerr << "Pose 2: " << std::endl << pose_2 << std::endl;
     }
     if (lineNumber > frame_2)
     {
@@ -178,7 +179,7 @@ bool readPoses(
     }
   }
 
-  Eigen::Matrix4d transform = pose_1.inverse() * pose_2;
+  Eigen::Matrix4d transform = pose_2 * pose_1.inverse();
   rotation = transform.block<3, 3>(0, 0);
   translation = transform.block<3, 1>(0, 3);
 

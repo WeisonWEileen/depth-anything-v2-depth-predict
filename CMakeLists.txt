@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 project(depth_calculate)
 
-set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_FLAGS "-std=c++14 -O3")
-
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS "-std=c++14")
+# set on compile commands json
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(OpenCV 4.2.0 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(TIFF REQUIRED)

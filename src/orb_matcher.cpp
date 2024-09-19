@@ -87,8 +87,8 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
             max_dist = dist;
     }
 
-    std::cout << "Max dist: " << max_dist << std::endl;
-    std::cout << "Min dist: " << min_dist << std::endl;
+    // std::cout << "Max dist: " << max_dist << std::endl;
+    // std::cout << "Min dist: " << min_dist << std::endl;
 
     // Filter Match Pairs.
     std::vector<cv::DMatch> good_matches;
@@ -107,13 +107,13 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
 
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> duration = end - start;
-    std::cout << "Calculate time: " << duration.count() << "ms" << std::endl;
+    // std::cout << "Calculate time: " << duration.count() << "ms" << std::endl;
 
     // show_matches(img_1, img_2, keypoints_1, keypoints_2, matches, "All Matches");
-    show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
+    // show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
     // visualize_matches(img_1, img_2, pixel_cords_1, pixel_cords_2, "Good Pairs");
 
-    cv::waitKey(0);
+    // cv::waitKey(0);
 
     return std::make_pair(pixel_cords_1, pixel_cords_2);
 }
