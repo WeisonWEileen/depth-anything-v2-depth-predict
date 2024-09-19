@@ -1,12 +1,12 @@
 #include "utils.h"
 
 void readDepthImage(
-    std::string file_name,
+    std::string & file_name,
     std::vector<std::vector<float>> &data)
 {
   png::image<png::gray_pixel_16> image(file_name);
-  int32_t width = image.get_width();
-  int32_t height = image.get_height();
+  size_t width = image.get_width();
+  size_t height = image.get_height();
 
   data.resize(height, std::vector<float>(width));
   for (int32_t v = 0; v < height; v++)
@@ -20,25 +20,14 @@ void readDepthImage(
       }
       else
       {
-        data[v][u] = ((float)val) / 256.0;
+        data[v][u] = (static_cast<float>(val)) / 256.0f;
       }
     }
   }
-
-  // std::cout << "Depth image: " << std::endl;
-
-  // for (int32_t v = 0; v < height; v++)
-  // {
-  //   for (int32_t u = 0; u < width; u++)
-  //   {
-  //     std::cout << data[v][u] << " ";
-  //   }
-  //   std::cout << std::endl;
-  // }
 }
 
 bool readTiffImage(
-    std::string file_name,
+    std::string& file_name,
     std::vector<std::vector<float>> &data)
 {
   TIFF *tif = TIFFOpen(file_name.c_str(), "r");
@@ -48,7 +37,7 @@ bool readTiffImage(
     return false;
   }
 
-  int32_t width, height;
+  int32_t width{0}, height{0};
   TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
   TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
 
@@ -62,22 +51,11 @@ bool readTiffImage(
 
   TIFFClose(tif);
 
-  // std::cout << "Predicted Depth image: " << std::endl;
-
-  // for (int32_t v = 0; v < height; v++)
-  // {
-  //   for (int32_t u = 0; u < width; u++)
-  //   {
-  //     std::cout << data[v][u] << " ";
-  //   }
-  //   std::cout << std::endl;
-  // }
-
   return true;
 }
 
 bool readIntrinsics(
-    std::string file_name,
+    std::string & file_name,
     Eigen::Matrix<double, 3, 3> &camera_intrinsics)
 {
   std::ifstream infile(file_name);
@@ -96,7 +74,7 @@ bool readIntrinsics(
       std::string temp;
       ss >> temp;
 
-      double value;
+      double value{0.0};
 
       for (int i = 0; i < 3; ++i)
       {
@@ -143,7 +121,7 @@ Eigen::Matrix4d readPoseFromLine(const std::string &line)
 }
 
 bool readPoses(
-    std::string file_name,
+    std::string & file_name,
     int frame_1,
     int frame_2,
     Eigen::Matrix3d &rotation,
@@ -166,7 +144,7 @@ bool readPoses(
     {
       pose_1 = readPoseFromLine(line);
        
-      std::cout << "Pose1: " << std::endl << pose_1 << std::endl;
+      std::cout << "Pose 1: " << std::endl << pose_1 << std::endl;
     }
     if (lineNumber == frame_2)
     {
@@ -179,7 +157,8 @@ bool readPoses(
     }
   }
 
-  Eigen::Matrix4d transform = pose_2 * pose_1.inverse();
+//   Eigen::Matrix4d transform = pose_2 * pose_1.inverse();
+  Eigen::Matrix4d transform = pose_1 * pose_2.inverse();
   rotation = transform.block<3, 3>(0, 0);
   translation = transform.block<3, 1>(0, 3);
 
