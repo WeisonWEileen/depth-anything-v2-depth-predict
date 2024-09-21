@@ -1,9 +1,6 @@
 #ifndef ORB_MATCHER_H
 #define ORB_MATCHER_H
 
-#include <iostream>
-#include <chrono>
-#include <cstddef>
 
 #include <opencv2/opencv.hpp>
 // #include <opencv2/core/core.hpp>
@@ -20,14 +17,14 @@ public:
     void show_keypoints(
         const cv::Mat &img,
         const std::vector<cv::KeyPoint> &keypoints,
-        std::string window_name);
+        std::string& window_name);
     void show_matches(
         const cv::Mat &img_1,
         const cv::Mat &img_2,
         const std::vector<cv::KeyPoint> &keypoints_1,
         const std::vector<cv::KeyPoint> &keypoints_2,
         const std::vector<cv::DMatch> &matches,
-        std::string window_name);
+        std::string& window_name);
     void visualize_matches(
         const cv::Mat &img_1,
         const cv::Mat &img_2,

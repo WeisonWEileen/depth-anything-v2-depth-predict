@@ -7,9 +7,9 @@ ORBMatcher::ORBMatcher()
 }
 
 void ORBMatcher::show_keypoints(
-    const cv::Mat &img,
-    const std::vector<cv::KeyPoint> &keypoints,
-    std::string window_name)
+    const cv::Mat& img,
+    const std::vector<cv::KeyPoint>& keypoints,
+    std::string& window_name)
 {
     cv::Mat outimg;
     cv::drawKeypoints(img, keypoints, outimg, cv::Scalar::all(-1), cv::DrawMatchesFlags::DEFAULT);
@@ -17,12 +17,12 @@ void ORBMatcher::show_keypoints(
 }
 
 void ORBMatcher::show_matches(
-    const cv::Mat &img_1,
-    const cv::Mat &img_2,
-    const std::vector<cv::KeyPoint> &keypoints_1,
-    const std::vector<cv::KeyPoint> &keypoints_2,
-    const std::vector<cv::DMatch> &matches,
-    std::string window_name)
+    const cv::Mat& img_1,
+    const cv::Mat& img_2,
+    const std::vector<cv::KeyPoint>& keypoints_1,
+    const std::vector<cv::KeyPoint>& keypoints_2,
+    const std::vector<cv::DMatch>& matches,
+    std::string& window_name)
 {
     cv::Mat img_match;
     cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, matches, img_match);
@@ -30,17 +30,16 @@ void ORBMatcher::show_matches(
 }
 
 void ORBMatcher::visualize_matches(
-    const cv::Mat &img_1,
-    const cv::Mat &img_2,
-    const std::vector<cv::Point> &pixel_cords_1,
-    const std::vector<cv::Point> &pixel_cords_2,
-    const std::string &window_name)
+    const cv::Mat& img_1,
+    const cv::Mat& img_2,
+    const std::vector<cv::Point>& pixel_cords_1,
+    const std::vector<cv::Point>& pixel_cords_2,
+    const std::string& window_name)
 {
     cv::Mat img_combined;
     cv::hconcat(img_1, img_2, img_combined);
 
-    for (int i = 0; i < pixel_cords_1.size(); i++)
-    {
+    for (int i = 0; i < pixel_cords_1.size(); i++) {
         cv::Point pt1 = pixel_cords_1[i];
         cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
 
@@ -53,8 +52,8 @@ void ORBMatcher::visualize_matches(
 }
 
 std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
-    const cv::Mat &img_1,
-    const cv::Mat &img_2)
+    const cv::Mat& img_1,
+    const cv::Mat& img_2)
 {
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -78,8 +77,7 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
 
     // Find the minimum and maximum distance between all matches.
     double min_dist = 10000, max_dist = 0;
-    for (int i = 0; i < descriptors_1.rows; i++)
-    {
+    for (int i = 0; i < descriptors_1.rows; i++) {
         double dist = matches[i].distance;
         if (dist < min_dist)
             min_dist = dist;
@@ -93,15 +91,13 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
     // Filter Match Pairs.
     std::vector<cv::DMatch> good_matches;
     std::vector<cv::Point> pixel_cords_1, pixel_cords_2;
-    for (int i = 0; i < descriptors_1.rows; i++)
-    {
-        if (matches[i].distance <= std::max(2 * min_dist, 20.0))
-        {
+    for (int i = 0; i < descriptors_1.rows; i++) {
+        if (matches[i].distance <= std::max(2 * min_dist, 20.0)) {
             good_matches.push_back(matches[i]);
             pixel_cords_1.push_back(cv::Point(static_cast<int>(keypoints_1[matches[i].queryIdx].pt.x),
-                                              static_cast<int>(keypoints_1[matches[i].queryIdx].pt.y)));
+                static_cast<int>(keypoints_1[matches[i].queryIdx].pt.y)));
             pixel_cords_2.push_back(cv::Point(static_cast<int>(keypoints_2[matches[i].trainIdx].pt.x),
-                                              static_cast<int>(keypoints_2[matches[i].trainIdx].pt.y)));
+                static_cast<int>(keypoints_2[matches[i].trainIdx].pt.y)));
         }
     }
 
@@ -111,9 +107,9 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> ORBMatcher::match(
 
     // show_matches(img_1, img_2, keypoints_1, keypoints_2, matches, "All Matches");
     // show_matches(img_1, img_2, keypoints_1, keypoints_2, good_matches, "Good Matches");
-    // visualize_matches(img_1, img_2, pixel_cords_1, pixel_cords_2, "Good Pairs");
+    visualize_matches(img_1, img_2, pixel_cords_1, pixel_cords_2, "Good Pairs");
 
-    // cv::waitKey(0);
+    cv::waitKey(0);
 
     return std::make_pair(pixel_cords_1, pixel_cords_2);
 }
