@@ -43,7 +43,7 @@ void ORBMatcher::visualize_matches(
         cv::Point pt1 = pixel_cords_1[i];
         cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
 
-        cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 2);
+        cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 1);
         cv::circle(img_combined, pt1, 5, cv::Scalar(0, 0, 255), -1);
         cv::circle(img_combined, pt2, 5, cv::Scalar(0, 0, 255), -1);
     }

@@ -33,6 +33,7 @@ public:
         const std::string &window_name);
 
 private:
+    // cv::Ptr<cv::ORB> detector_;
     cv::Ptr<cv::ORB> detector_;
     cv::Ptr<cv::DescriptorMatcher> matcher_;
 };

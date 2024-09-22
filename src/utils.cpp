@@ -1,3 +1,4 @@
+#include "cnpy.h"
 #include "utils.h"
 
 void readDepthImage(
@@ -166,4 +167,34 @@ bool readPoses(
 
   infile.close();
   return true;
+}
+
+std::pair<std::vector<cv::Point>, std::vector<cv::Point>> load_npy_points(const std::string& file1, const std::string& file2) {
+    // 读取 .npy 文件
+    cnpy::NpyArray arr1 = cnpy::npy_load(file1);
+    cnpy::NpyArray arr2 = cnpy::npy_load(file2);
+
+    // 获取数据指针
+    int* data1 = arr1.data<int>();
+    int* data2 = arr2.data<int>();
+
+    // 获取数组形状
+    auto shape1 = arr1.shape;
+    auto shape2 = arr2.shape;
+
+    
+
+    // 确保形状匹配
+    if (shape1 != shape2 || shape1.size() != 2 || shape1[1] != 2) {
+        throw std::runtime_error("Shape mismatch or invalid shape");
+    }
+
+    // 转换为 std::vector<cv::Point>
+    std::vector<cv::Point> points1, points2;
+    for (unsigned int i = 0; i < shape1[0]; ++i) {
+        points1.emplace_back(data1[i * 2], data1[i * 2 + 1]);
+        points2.emplace_back(data2[i * 2], data2[i * 2 + 1]);
+    }
+
+    return std::make_pair(points1, points2);
 }

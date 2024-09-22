@@ -9,6 +9,7 @@ find_package(OpenCV 4.2.0 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(TIFF REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_library(CNPY_LIB cnpy)
 
 include_directories(
   ${CMAKE_SOURCE_DIR}/include
@@ -21,5 +22,5 @@ include_directories(
 # target_link_libraries(feature_extraction ${OpenCV_LIBS})
 
 add_executable(depth_calculator src/depth_calculator.cpp src/utils.cpp src/orb_matcher.cpp src/depth_aligner.cpp)
-target_link_libraries(depth_calculator ${OpenCV_LIBS} PNG::PNG TIFF::TIFF Eigen3::Eigen)
+target_link_libraries(depth_calculator ${OpenCV_LIBS} PNG::PNG TIFF::TIFF Eigen3::Eigen ${CNPY_LIB})
 

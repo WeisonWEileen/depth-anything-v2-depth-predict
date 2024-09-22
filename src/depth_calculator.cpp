@@ -82,8 +82,12 @@ int main()
     }
 
     ORBMatcher orb_matcher;
-    std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
+    // std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
+    auto pixel_cords = load_npy_points("/home/weison/LightGlue/m_kpts0.npy", "/home/weison/LightGlue/m_kpts1.npy");
     std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl;
+    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Good Pairs");
+
+    cv::waitKey(0);
     // orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
     // cv::waitKey(0);
 

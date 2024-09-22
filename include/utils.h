@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <opencv2/opencv.hpp>
 #include <png++/png.hpp>
 #include <tiffio.h>
 #include <Eigen/Dense>
@@ -29,5 +30,7 @@ bool readPoses(
     Eigen::Vector3d &translation);
 
 Eigen::Matrix4d readPoseFromLine(const std::string &line);
+
+std::pair<std::vector<cv::Point>, std::vector<cv::Point>> load_npy_points(const std::string& file1, const std::string& file2); 
 
 #endif

@@ -47,8 +47,8 @@ void DepthAligner::align(
 
         float depth_1 = depth_preds.first[pixel_1.y][pixel_1.x];
         float depth_2 = depth_preds.second[pixel_2.y][pixel_2.x];
-        std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
-        std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
+        // std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
+        // std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
  
         Eigen::Vector3d col_1 = depth_1 * camera_intrinsics.inverse() * point_1;
         Eigen::Vector3d col_2 = camera_intrinsics.inverse() * point_1;
