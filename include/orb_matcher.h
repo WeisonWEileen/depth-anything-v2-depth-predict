@@ -2,6 +2,7 @@
 #define ORB_MATCHER_H
 
 
+#include <initializer_list>
 #include <opencv2/opencv.hpp>
 // #include <opencv2/core/core.hpp>
 // #include <opencv2/features2d/features2d.hpp>
@@ -31,6 +32,14 @@ public:
         const std::vector<cv::Point> &pixel_cords_1,
         const std::vector<cv::Point> &pixel_cords_2,
         const std::string &window_name);
+
+    void visualize_matches(
+        const cv::Mat& img_1,
+        const cv::Mat& img_2,
+        const std::vector<cv::Point>& pixel_cords_1,
+        const std::vector<cv::Point>& pixel_cords_2,
+        const std::string& window_name,
+        const std::initializer_list<int> & valid_indexes);
 
 private:
     // cv::Ptr<cv::ORB> detector_;

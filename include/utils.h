@@ -34,4 +34,7 @@ Eigen::Matrix4d readPoseFromLine(const std::string &line);
 
 std::pair<std::vector<cv::Point>, std::vector<cv::Point>> load_npy_points(const std::string& file1, const std::string& file2); 
 
+
+void disparity2depth(std::vector<std::vector<float>>& img,float down_limit);
+
 #endif

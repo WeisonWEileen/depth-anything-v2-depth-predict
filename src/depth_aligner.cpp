@@ -1,4 +1,5 @@
 #include "depth_aligner.h"
+#include <initializer_list>
 
 DepthAligner::DepthAligner()
 {
@@ -34,7 +35,7 @@ void DepthAligner::align(
     Eigen::VectorXd y(static_cast<int>(3 * pixel_cords.first.size()));
     Eigen::MatrixXd H(static_cast<int>(3 * pixel_cords.first.size()), 4);
 
-    for (int i = 0; i < pixel_cords.first.size() - 30; i++) {
+    for (int i = 0; i < pixel_cords.first.size(); i++) {
         y.segment<3>(3 * i) = translation;
 
         cv::Point pixel_1 = pixel_cords.first[i];
@@ -47,7 +48,7 @@ void DepthAligner::align(
         float depth_2 = depth_preds.second[pixel_2.y][pixel_2.x];
         // std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
         // std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
- 
+
         Eigen::Vector3d col_1 = depth_1 * camera_intrinsics.inverse() * point_1;
         Eigen::Vector3d col_2 = camera_intrinsics.inverse() * point_1;
         Eigen::Vector3d col_3 = -depth_2 * rotation * camera_intrinsics.inverse() * point_2;
@@ -57,6 +58,53 @@ void DepthAligner::align(
         H.block<3, 1>(i * 3, 1) = col_2;
         H.block<3, 1>(i * 3, 2) = col_3;
         H.block<3, 1>(i * 3, 3) = col_4;
+    }
+
+    Eigen::VectorXd beta = linearLeastSquares(y, H);
+
+    std::cout << "scale_1 and shift_1  " << beta(0) << " " << beta(1) << std::endl;
+    std::cout << "scale_2 and shift_2  " << beta(2) << " " << beta(3) << std::endl;
+}
+
+void DepthAligner::align(
+    const std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>>& depth_preds,
+    const std::pair<std::vector<cv::Point>, std::vector<cv::Point>>& pixel_cords,
+    const Eigen::Matrix<double, 3, 3>& camera_intrinsics,
+    const Eigen::Matrix3d& rotation,
+    const Eigen::Vector3d& translation,
+    const std::initializer_list<int> &valid_indexes)
+{
+    Eigen::VectorXd y(static_cast<int>(3 * valid_indexes.size()));
+    Eigen::MatrixXd H(static_cast<int>(3 * valid_indexes.size()), 4);
+    int j = 0;
+
+    for (int i = 0; i < pixel_cords.first.size(); i++) {
+
+        if (std::find(valid_indexes.begin(), valid_indexes.end(), i) != valid_indexes.end()) {
+            y.segment<3>(3 * j) = translation;
+
+            cv::Point pixel_1 = pixel_cords.first[i];
+            cv::Point pixel_2 = pixel_cords.second[i];
+
+            Eigen::Vector3d point_1 = Eigen::Vector3d(pixel_1.x, pixel_1.y, 1);
+            Eigen::Vector3d point_2 = Eigen::Vector3d(pixel_2.x, pixel_2.y, 1);
+
+            float depth_1 = depth_preds.first[pixel_1.y][pixel_1.x];
+            float depth_2 = depth_preds.second[pixel_2.y][pixel_2.x];
+            // std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
+            // std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
+
+            Eigen::Vector3d col_1 = depth_1 * camera_intrinsics.inverse() * point_1;
+            Eigen::Vector3d col_2 = camera_intrinsics.inverse() * point_1;
+            Eigen::Vector3d col_3 = -depth_2 * rotation * camera_intrinsics.inverse() * point_2;
+            Eigen::Vector3d col_4 = -rotation * camera_intrinsics.inverse() * point_2;
+
+            H.block<3, 1>(j * 3, 0) = col_1;
+            H.block<3, 1>(j * 3, 1) = col_2;
+            H.block<3, 1>(j * 3, 2) = col_3;
+            H.block<3, 1>(j * 3, 3) = col_4;
+            j++;
+        }
     }
 
     Eigen::VectorXd beta = linearLeastSquares(y, H);

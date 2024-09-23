@@ -166,22 +166,20 @@ bool readPoses(
   Eigen::Matrix4d transform = pose_1 * pose_2.inverse();
   rotations.push_back(transform.block<3, 3>(0, 0));
   translations.push_back( transform.block<3, 1>(0,3)) ;
-  
 
+//   Eigen::Matrix4d transform2 = pose_1.inverse() * pose_2;
+//   rotations.push_back(transform2.block<3, 3>(0, 0));
+//   translations.push_back( transform2.block<3, 1>(0,3)) ;
+//   infile.close();
 
-  Eigen::Matrix4d transform2 = pose_1.inverse() * pose_2;
-  rotations.push_back(transform2.block<3, 3>(0, 0));
-  translations.push_back( transform2.block<3, 1>(0,3)) ;
-  infile.close();
-
-  Eigen::Matrix4d transform3 =  pose_2.inverse() * pose_1;
-  rotations.push_back(transform3.block<3, 3>(0, 0));
-  translations.push_back(transform3.block<3, 1>(0, 3));
+//   Eigen::Matrix4d transform3 =  pose_2.inverse() * pose_1;
+//   rotations.push_back(transform3.block<3, 3>(0, 0));
+//   translations.push_back(transform3.block<3, 1>(0, 3));
 
  
-  Eigen::Matrix4d transform4 =  pose_2 * pose_1.inverse();
-  rotations.push_back(transform4.block<3, 3>(0, 0));
-  translations.push_back(transform4.block<3, 1>(0, 3));
+//   Eigen::Matrix4d transform4 =  pose_2 * pose_1.inverse();
+//   rotations.push_back(transform4.block<3, 3>(0, 0));
+//   translations.push_back(transform4.block<3, 1>(0, 3));
 
   return true;
 }
@@ -214,4 +212,21 @@ std::pair<std::vector<cv::Point>, std::vector<cv::Point>> load_npy_points(const 
     }
 
     return std::make_pair(points1, points2);
+}
+
+
+void disparity2depth(std::vector<std::vector<float>>& img,float down_limit)
+{
+    // limit img
+    for (auto& row : img) {
+        for (auto& value : row) {
+            if (value < down_limit) {
+                value = down_limit;
+            }
+            if (std::isfinite(value) && value != 0.0f) // Check if value is finite and not zero
+            {
+                value = 1.0f / value;
+            }
+        }
+    }
 }

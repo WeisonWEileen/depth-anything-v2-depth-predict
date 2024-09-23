@@ -1,4 +1,10 @@
 #include "orb_matcher.h"
+#include <initializer_list>
+#include <opencv2/imgproc.hpp>
+
+const int fontFace = cv::FONT_HERSHEY_SIMPLEX;
+const double fontScale = 0.5;
+const int thickness = 1;
 
 ORBMatcher::ORBMatcher()
 {
@@ -34,18 +40,55 @@ void ORBMatcher::visualize_matches(
     const cv::Mat& img_2,
     const std::vector<cv::Point>& pixel_cords_1,
     const std::vector<cv::Point>& pixel_cords_2,
-    const std::string& window_name)
+    const std::string& window_name) 
 {
     cv::Mat img_combined;
     cv::hconcat(img_1, img_2, img_combined);
 
+    // std::initializer_list<int> valid_indexes{ 11,12,13,14,79, 33, 30, 56,99,100,101,102,103,104,105,106,107,108};
     for (int i = 0; i < pixel_cords_1.size(); i++) {
-        cv::Point pt1 = pixel_cords_1[i];
-        cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
+            cv::Point pt1 = pixel_cords_1[i];
+            cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
 
-        cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 1);
-        cv::circle(img_combined, pt1, 5, cv::Scalar(0, 0, 255), 0);
-        cv::circle(img_combined, pt2, 5, cv::Scalar(0, 0, 255), 0);
+            cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 1);
+            cv::circle(img_combined, pt1, 5, cv::Scalar(0, 0, 255), 0);
+            cv::circle(img_combined, pt2, 5, cv::Scalar(0, 0, 255), 0);
+
+            // 将数字 i 绘制在第一个圆圈的中心
+            std::string text = std::to_string(i);
+            cv::Size textSize = cv::getTextSize(text, fontFace, fontScale, thickness, 0);
+            cv::Point textOrg(pt1.x - textSize.width / 2, pt1.y + textSize.height / 2);
+            cv::putText(img_combined, text, textOrg, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+    }
+    cv::imshow(window_name, img_combined);
+}
+
+void ORBMatcher::visualize_matches(
+    const cv::Mat& img_1,
+    const cv::Mat& img_2,
+    const std::vector<cv::Point>& pixel_cords_1,
+    const std::vector<cv::Point>& pixel_cords_2,
+    const std::string& window_name, const std::initializer_list<int>& valid_indexes)
+{
+    cv::Mat img_combined;
+    cv::hconcat(img_1, img_2, img_combined);
+
+    // std::initializer_list<int> valid_indexes{ 11,12,13,14,79, 33, 30, 56,99,100,101,102,103,104,105,106,107,108};
+    for (int i = 0; i < pixel_cords_1.size(); i++) {
+        if (std::find(valid_indexes.begin(), valid_indexes.end(), i) != valid_indexes.end()) {
+            cv::Point pt1 = pixel_cords_1[i];
+            cv::Point pt2 = pixel_cords_2[i] + cv::Point(img_1.cols, 0);
+
+            cv::line(img_combined, pt1, pt2, cv::Scalar(0, 255, 0), 1);
+            cv::circle(img_combined, pt1, 5, cv::Scalar(0, 0, 255), 0);
+            cv::circle(img_combined, pt2, 5, cv::Scalar(0, 0, 255), 0);
+
+            // 将数字 i 绘制在第一个圆圈的中心
+            std::string text = std::to_string(i);
+            cv::Size textSize = cv::getTextSize(text, fontFace, fontScale, thickness, 0);
+            cv::Point textOrg(pt1.x - textSize.width / 2, pt1.y + textSize.height / 2);
+            cv::putText(img_combined, text, textOrg, fontFace, fontScale, cv::Scalar(255, 255, 255), thickness);
+        }
     }
 
     cv::imshow(window_name, img_combined);

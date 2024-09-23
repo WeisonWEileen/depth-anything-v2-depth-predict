@@ -1,4 +1,8 @@
 # depth_calculate
+## 一些比较稳定的 深度预测的点
+index : 
+79 33 30 56
+
 ## run the demo:
 rgb tif and txt files path are configured in ```${workspacefolder}/config/filePath.yaml```. Modified it then run the programme. In the project root dir.
 ```

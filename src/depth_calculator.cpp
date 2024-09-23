@@ -1,26 +1,11 @@
+#include <initializer_list>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "depth_aligner.h"
 #include "orb_matcher.h"
 #include "utils.h"
-
-auto disparity2depth(std::vector<std::vector<float>>& img)
-{
-    // limit img
-    for (auto& row : img) {
-        for (auto& value : row) {
-            if (value < 40.0f) {
-                value = 40.0f;
-            }
-            if (std::isfinite(value) && value != 0.0f) // Check if value is finite and not zero
-            {
-                value = 1.0f / value;
-            }
-        }
-    }
-    return img;
-}
 
 void getPathConfigs(cv::FileStorage& fsSettings, std::vector<std::string>& file_paths)
 {
@@ -32,7 +17,7 @@ void getPathConfigs(cv::FileStorage& fsSettings, std::vector<std::string>& file_
     file_paths.push_back(fsSettings["poses_path"]);
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     std::string config_file = "./config/filePath.yaml";
     cv::FileStorage fsSettings(config_file.c_str(), cv::FileStorage::READ);
@@ -58,14 +43,14 @@ int main()
         std::cerr << "Error: Could not open or find the depth_pred1" << std::endl;
         return -1;
     }
-    depth_pred_1 = disparity2depth(depth_pred_1);
+    disparity2depth(depth_pred_1, 40.0f);
 
     std::vector<std::vector<float>> depth_pred_2;
     if (!readTiffImage(file_paths[3], depth_pred_2)) {
         std::cerr << "Error: Could not open or find the depth_pred2" << std::endl;
         return -1;
     }
-    depth_pred_2 = disparity2depth(depth_pred_2);
+    disparity2depth(depth_pred_2, 40.0f);
 
     Eigen::Matrix<double, 3, 3> camera_intrinsics;
     if (!readIntrinsics(file_paths[4], camera_intrinsics)) {
@@ -81,24 +66,25 @@ int main()
         std::cerr << "Error: Could not open or find the poses." << std::endl;
         return -1;
     }
-
+    std::initializer_list<int> valid_indexes{79,33,30,56,100 ,102,108,305,393};
     // using ORB to match the keypoints
     ORBMatcher orb_matcher;
     // std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
 
     // to load the precomputed orb matches
     auto pixel_cords = load_npy_points("/home/weison/LightGlue/m_kpts0.npy", "/home/weison/LightGlue/m_kpts1.npy");
-    std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl;
+    std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl; 
 
     std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> depth_preds = std::make_pair(depth_pred_1, depth_pred_2);
     DepthAligner depth_aligner;
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[0], translation[0]);
+    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[0], translation[0],valid_indexes);
 
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
 
-    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
+    // orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches",valid_indexes);
+    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches",valid_indexes);
     cv::waitKey(0);
 
     return 0;
