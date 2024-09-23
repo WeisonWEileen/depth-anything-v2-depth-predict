@@ -10,8 +10,8 @@ auto disparity2depth(std::vector<std::vector<float>>& img)
     // limit img
     for (auto& row : img) {
         for (auto& value : row) {
-            if (value < 30.0f) {
-                value = 30.0f;
+            if (value < 40.0f) {
+                value = 40.0f;
             }
             if (std::isfinite(value) && value != 0.0f) // Check if value is finite and not zero
             {
@@ -94,9 +94,9 @@ int main()
     DepthAligner depth_aligner;
     depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[0], translation[0]);
 
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
+    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
+    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
+    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
 
     orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
     cv::waitKey(0);
