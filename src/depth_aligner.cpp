@@ -29,9 +29,7 @@ void DepthAligner::align(
     const std::pair<std::vector<cv::Point>, std::vector<cv::Point>>& pixel_cords,
     const Eigen::Matrix<double, 3, 3>& camera_intrinsics,
     const Eigen::Matrix3d& rotation,
-    const Eigen::Vector3d& translation,
-    std::pair<float, float>& scales,
-    std::pair<float, float>& shifts)
+    const Eigen::Vector3d& translation)
 {
     Eigen::VectorXd y(static_cast<int>(3 * pixel_cords.first.size()));
     Eigen::MatrixXd H(static_cast<int>(3 * pixel_cords.first.size()), 4);
@@ -62,6 +60,7 @@ void DepthAligner::align(
     }
 
     Eigen::VectorXd beta = linearLeastSquares(y, H);
-    scales = std::make_pair(beta(0), beta(2));
-    shifts = std::make_pair(beta(1), beta(3));
+
+    std::cout << "scale_1 and shift_1  " << beta(0) << " " << beta(1) << std::endl;
+    std::cout << "scale_2 and shift_2  " << beta(2) << " " << beta(3) << std::endl;
 }

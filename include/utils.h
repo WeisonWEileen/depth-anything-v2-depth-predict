@@ -7,6 +7,7 @@
 #include <png++/png.hpp>
 #include <tiffio.h>
 #include <Eigen/Dense>
+#include <vector>
 
 void readDepthImage(
     std::string & file_name,
@@ -26,8 +27,8 @@ bool readPoses(
     std::string& file_name,
     int frame_1,
     int frame_2,
-    Eigen::Matrix3d &rotation,
-    Eigen::Vector3d &translation);
+    std::vector<Eigen::Matrix3d> &rotation,
+    std::vector<Eigen::Vector3d> &translation);
 
 Eigen::Matrix4d readPoseFromLine(const std::string &line);
 

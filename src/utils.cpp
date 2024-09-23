@@ -1,4 +1,5 @@
 #include "cnpy.h"
+#include <vector>
 #include "utils.h"
 
 void readDepthImage(
@@ -125,8 +126,8 @@ bool readPoses(
     std::string & file_name,
     int frame_1,
     int frame_2,
-    Eigen::Matrix3d &rotation,
-    Eigen::Vector3d &translation)
+    std::vector<Eigen::Matrix3d> &rotations,
+    std::vector<Eigen::Vector3d> &translations)
 {
   std::ifstream infile(file_name);
   if (!infile.is_open())
@@ -159,13 +160,29 @@ bool readPoses(
   }
 
 //   Eigen::Matrix4d transform = pose_2 * pose_1.inverse();
-  Eigen::Matrix4d transform = pose_1 * pose_2.inverse();
 //   rotation = transform.block<3, 3>(0, 0);
+//   Eigen::Matrix4d transform = pose_1 * pose_2.inverse();
 //   translation = transform.block<3, 1>(0, 3);
-  rotation = pose_1.block<3, 3>(0, 0);
-  translation = pose_1.block<3, 1>(0,3) ;
+  Eigen::Matrix4d transform = pose_1 * pose_2.inverse();
+  rotations.push_back(transform.block<3, 3>(0, 0));
+  translations.push_back( transform.block<3, 1>(0,3)) ;
+  
 
+
+  Eigen::Matrix4d transform2 = pose_1.inverse() * pose_2;
+  rotations.push_back(transform2.block<3, 3>(0, 0));
+  translations.push_back( transform2.block<3, 1>(0,3)) ;
   infile.close();
+
+  Eigen::Matrix4d transform3 =  pose_2.inverse() * pose_1;
+  rotations.push_back(transform3.block<3, 3>(0, 0));
+  translations.push_back(transform3.block<3, 1>(0, 3));
+
+ 
+  Eigen::Matrix4d transform4 =  pose_2 * pose_1.inverse();
+  rotations.push_back(transform4.block<3, 3>(0, 0));
+  translations.push_back(transform4.block<3, 1>(0, 3));
+
   return true;
 }
 

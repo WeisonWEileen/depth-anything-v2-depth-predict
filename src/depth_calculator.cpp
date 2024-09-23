@@ -1,4 +1,5 @@
 #include <string>
+#include <vector>
 
 #include "depth_aligner.h"
 #include "orb_matcher.h"
@@ -72,8 +73,8 @@ int main()
         return -1;
     }
 
-    Eigen::Matrix3d rotation;
-    Eigen::Vector3d translation;
+    std::vector<Eigen::Matrix3d> rotation;
+    std::vector<Eigen::Vector3d> translation;
     int frame_1 = extractNumber(file_paths[0]);
     int frame_2 = extractNumber(file_paths[1]);
     if (!readPoses(file_paths[5], frame_1 + 1, frame_2 + 1, rotation, translation)) {
@@ -81,24 +82,24 @@ int main()
         return -1;
     }
 
+    // using ORB to match the keypoints
     ORBMatcher orb_matcher;
     // std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
+
+    // to load the precomputed orb matches
     auto pixel_cords = load_npy_points("/home/weison/LightGlue/m_kpts0.npy", "/home/weison/LightGlue/m_kpts1.npy");
     std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl;
-    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Good Pairs");
-
-    cv::waitKey(0);
-    // orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
-    // cv::waitKey(0);
 
     std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> depth_preds = std::make_pair(depth_pred_1, depth_pred_2);
     DepthAligner depth_aligner;
-    std::pair<float, float> scales;
-    std::pair<float, float> shifts;
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation, translation, scales, shifts);
+    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[0], translation[0]);
 
-    std::cout << "Scales: " << scales.first << " " << scales.second << std::endl;
-    std::cout << "Shifts: " << shifts.first << " " << shifts.second << std::endl;
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
+    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
+
+    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches");
+    cv::waitKey(0);
 
     return 0;
 }
