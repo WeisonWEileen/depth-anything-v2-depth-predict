@@ -2,8 +2,13 @@
 #define DEPTH_ALIGNER_H
 
 #include <Eigen/Dense>
+#include <array>
 #include <initializer_list>
 #include <opencv2/opencv.hpp>
+
+// grouth truth value for scale and shift 
+const std::array<float,2> gt_ss_71{2158.7249,0.5174077};
+const std::array<float,2> gt_ss_75{2134.702,1.1729892};
 
 class DepthAligner
 {

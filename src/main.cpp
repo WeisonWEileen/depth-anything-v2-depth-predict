@@ -1,4 +1,6 @@
+#include <cstddef>
 #include <initializer_list>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -66,25 +68,23 @@ int main(int argc, char* argv[])
         std::cerr << "Error: Could not open or find the poses." << std::endl;
         return -1;
     }
-    std::initializer_list<int> valid_indexes{79,33,30,56,100 ,102,108,305,393};
+    std::initializer_list<int> valid_indexes { 79, 33, 30, 56, 100, 102, 108, 305, 393 };
     // using ORB to match the keypoints
     ORBMatcher orb_matcher;
     // std::pair<std::vector<cv::Point>, std::vector<cv::Point>> pixel_cords = orb_matcher.match(img_1, img_2);
 
     // to load the precomputed orb matches
     auto pixel_cords = load_npy_points("/home/weison/LightGlue/m_kpts0.npy", "/home/weison/LightGlue/m_kpts1.npy");
-    std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl; 
+    std::cout << "Number of orb pairs: " << pixel_cords.first.size() << std::endl;
 
     std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>> depth_preds = std::make_pair(depth_pred_1, depth_pred_2);
     DepthAligner depth_aligner;
-    depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[0], translation[0],valid_indexes);
-
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[1], translation[1]);
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[2], translation[2]);
-    // depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[3], translation[3]);
-
+    for (size_t i = 0; i < rotation.size(); i++) {
+        std::cout<<"=========="<<std::endl;
+        depth_aligner.align(depth_preds, pixel_cords, camera_intrinsics, rotation[i], translation[i], valid_indexes);
+    }
     // orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches",valid_indexes);
-    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches",valid_indexes);
+    orb_matcher.visualize_matches(img_1, img_2, pixel_cords.first, pixel_cords.second, "Matches", valid_indexes);
     cv::waitKey(0);
 
     return 0;

@@ -1,4 +1,5 @@
 #include "depth_aligner.h"
+#include "utils.h"
 #include <initializer_list>
 
 DepthAligner::DepthAligner()
@@ -46,8 +47,6 @@ void DepthAligner::align(
 
         float depth_1 = depth_preds.first[pixel_1.y][pixel_1.x];
         float depth_2 = depth_preds.second[pixel_2.y][pixel_2.x];
-        // std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
-        // std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
 
         Eigen::Vector3d col_1 = depth_1 * camera_intrinsics.inverse() * point_1;
         Eigen::Vector3d col_2 = camera_intrinsics.inverse() * point_1;
@@ -66,20 +65,29 @@ void DepthAligner::align(
     std::cout << "scale_2 and shift_2  " << beta(2) << " " << beta(3) << std::endl;
 }
 
+/**
+ * @brief using prior knowledge of relative camera pose to calculate the scale and shift 
+ * 
+ * @param depth_preds depth anything vit model output
+ * @param pixel_cords detected keypoints
+ * @param camera_intrinsics 
+ * @param rotation from i+1 frame to i frame
+ * @param translation 
+ * @param valid_indexes 
+ */
 void DepthAligner::align(
     const std::pair<std::vector<std::vector<float>>, std::vector<std::vector<float>>>& depth_preds,
     const std::pair<std::vector<cv::Point>, std::vector<cv::Point>>& pixel_cords,
     const Eigen::Matrix<double, 3, 3>& camera_intrinsics,
     const Eigen::Matrix3d& rotation,
     const Eigen::Vector3d& translation,
-    const std::initializer_list<int> &valid_indexes)
+    const std::initializer_list<int>& valid_indexes)
 {
     Eigen::VectorXd y(static_cast<int>(3 * valid_indexes.size()));
     Eigen::MatrixXd H(static_cast<int>(3 * valid_indexes.size()), 4);
+
     int j = 0;
-
     for (int i = 0; i < pixel_cords.first.size(); i++) {
-
         if (std::find(valid_indexes.begin(), valid_indexes.end(), i) != valid_indexes.end()) {
             y.segment<3>(3 * j) = translation;
 
@@ -91,8 +99,6 @@ void DepthAligner::align(
 
             float depth_1 = depth_preds.first[pixel_1.y][pixel_1.x];
             float depth_2 = depth_preds.second[pixel_2.y][pixel_2.x];
-            // std::cout << "depth_1: " <<depth_1 << " depth_2: " << depth_2   << std::endl;
-            // std::cout << "depth_1: " <<(depth_1 *2158.7249 +0.517) << " depth_2: " << (depth_2 *2134.702 + 1.17)  << std::endl;
 
             Eigen::Vector3d col_1 = depth_1 * camera_intrinsics.inverse() * point_1;
             Eigen::Vector3d col_2 = camera_intrinsics.inverse() * point_1;
@@ -108,7 +114,15 @@ void DepthAligner::align(
     }
 
     Eigen::VectorXd beta = linearLeastSquares(y, H);
+    std::array<float, 2> results_scsi_71 { static_cast<float>(beta(0)), static_cast<float>(beta(1)) };
+    std::array<float, 2> results_scsi_75 { static_cast<float>(beta(2)), static_cast<float>(beta(3)) };
+    std::cout << "scale_1 and shift_1  " << results_scsi_71[0] << " " << results_scsi_71[1] << std::endl;
+    std::cout << "scale_2 and shift_2  " << results_scsi_75[0] << " " << results_scsi_75[1] << std::endl;
+    auto depth_gt_71 = rel2absDepth(depth_preds.first, gt_ss_71);
+    auto depth_gt_75 = rel2absDepth(depth_preds.second, gt_ss_75);
+    auto depth_71 = rel2absDepth(depth_preds.first, results_scsi_71);
+    auto depth_75 = rel2absDepth(depth_preds.second, results_scsi_75);
 
-    std::cout << "scale_1 and shift_1  " << beta(0) << " " << beta(1) << std::endl;
-    std::cout << "scale_2 and shift_2  " << beta(2) << " " << beta(3) << std::endl;
+    depth_error_measure(pixel_cords.first,depth_gt_71, depth_71, valid_indexes);
+    depth_error_measure(pixel_cords.second,depth_gt_75, depth_75, valid_indexes);
 }

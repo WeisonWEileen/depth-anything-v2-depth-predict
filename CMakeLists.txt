@@ -21,6 +21,6 @@ include_directories(
 # add_executable(feature_extraction feature_extration.cpp)
 # target_link_libraries(feature_extraction ${OpenCV_LIBS})
 
-add_executable(depth_calculator src/depth_calculator.cpp src/utils.cpp src/orb_matcher.cpp src/depth_aligner.cpp)
+add_executable(depth_calculator src/main.cpp src/utils.cpp src/orb_matcher.cpp src/depth_aligner.cpp)
 target_link_libraries(depth_calculator ${OpenCV_LIBS} PNG::PNG TIFF::TIFF Eigen3::Eigen ${CNPY_LIB})
 

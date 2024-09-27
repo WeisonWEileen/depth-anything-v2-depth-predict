@@ -17,6 +17,11 @@ cmkae --build build
 
 ### TODO
 为什么算出来是负数就更加逆天了，我觉得坐标变换应该没有错的啊
+
+### 推送代码
+```
+git push origin weison:master
+```
 $$
 ^iT P_{world}= {^{i}P_{cam}}\\
 {^{i+1}T_i} P_{world}={^{i+1}P_{cam}}\\
